@@ -24,14 +24,18 @@ import android.support.annotation.Nullable;
 
 import com.devbrackets.android.exomedia.core.exception.NativeMediaPlaybackException;
 import com.devbrackets.android.exomedia.core.exoplayer.ExoMediaPlayer;
+import com.devbrackets.android.exomedia.annotation.ExoPlayerState;
+import com.devbrackets.android.exomedia.annotation.PlaybackStateType;
 import com.devbrackets.android.exomedia.core.listener.ExoPlayerListener;
 import com.devbrackets.android.exomedia.core.listener.MetadataListener;
 import com.devbrackets.android.exomedia.core.video.ClearableSurface;
 import com.devbrackets.android.exomedia.listener.OnBufferUpdateListener;
 import com.devbrackets.android.exomedia.listener.OnCompletionListener;
 import com.devbrackets.android.exomedia.listener.OnErrorListener;
+import com.devbrackets.android.exomedia.listener.OnPlaybackStateChangeListener;
 import com.devbrackets.android.exomedia.listener.OnPreparedListener;
 import com.devbrackets.android.exomedia.listener.OnSeekCompletionListener;
+import com.devbrackets.android.exomedia.type.PlaybackState;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.metadata.Metadata;
 
@@ -64,6 +68,8 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
     private OnErrorListener errorListener;
     @Nullable
     private MetadataListener metadataListener;
+    @Nullable
+    private OnPlaybackStateChangeListener stateChangeListener; //todo use with MediaPlayer backing
 
     @NonNull
     private WeakReference<ClearableSurface> clearableSurfaceRef = new WeakReference<>(null);
@@ -83,6 +89,8 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
 
     @Override
     public void onCompletion(MediaPlayer mp) {
+        notifyStateChange(PlaybackState.COMPLETED);
+
         if (completionListener != null) {
             completionListener.onCompletion();
         }
@@ -90,6 +98,7 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        notifyStateChange(PlaybackState.ERROR);
         return notifyErrorListener(new NativeMediaPlaybackException(what, extra));
     }
 
@@ -113,7 +122,10 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
     }
 
     @Override
-    public void onStateChanged(boolean playWhenReady, int playbackState) {
+    public void onStateChanged(boolean playWhenReady, @ExoPlayerState int playbackState) {
+        notifyStateChange(playbackState); //todo the mapping is no longer valid
+
+        //Makes sure the ended and prepared listeners are notified
         if (playbackState == ExoPlayer.STATE_ENDED) {
             muxNotifier.onMediaPlaybackEnded();
 
@@ -236,6 +248,15 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
     }
 
     /**
+     * Sets the listener to inform of playback state changes
+     *
+     * @param listener The listener to inform
+     */
+    public void setOnPlaybackStateChangeListener(@Nullable OnPlaybackStateChangeListener listener) {
+        stateChangeListener = listener;
+    }
+
+    /**
      * Sets weather the listener was notified when we became prepared.
      *
      * @param wasNotified True if the onPreparedListener was already notified
@@ -264,6 +285,12 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
         notifiedCompleted = wasNotified;
     }
 
+    protected void notifyStateChange(@PlaybackStateType int state) {
+        if (stateChangeListener != null) {
+            stateChangeListener.onPlaybackStateChange(state);
+        }
+    }
+
     private boolean notifyErrorListener(Exception e) {
         return errorListener != null && errorListener.onError(e);
     }
@@ -279,14 +306,6 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
         });
     }
 
-    private void performPreparedHandlerNotification() {
-        muxNotifier.onPrepared();
-
-        if (preparedListener != null) {
-            preparedListener.onPrepared();
-        }
-    }
-
     private void notifyCompletionListener() {
         if (!muxNotifier.shouldNotifyCompletion(COMPLETED_DURATION_LEEWAY)) {
             return;
@@ -297,11 +316,26 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
         delayedHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (completionListener != null) {
-                    completionListener.onCompletion();
-                }
+                performCompletionHandlerNotification();
             }
         });
+    }
+
+    private void performPreparedHandlerNotification() {
+        notifyStateChange(PlaybackState.READY);
+        muxNotifier.onPrepared();
+
+        if (preparedListener != null) {
+            preparedListener.onPrepared();
+        }
+    }
+
+    private void performCompletionHandlerNotification() {
+        notifyStateChange(PlaybackState.COMPLETED);
+
+        if (completionListener != null) {
+            completionListener.onCompletion();
+        }
     }
 
     public static abstract class Notifier {

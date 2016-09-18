@@ -34,6 +34,7 @@ import android.view.Surface;
 
 import com.devbrackets.android.exomedia.ExoMedia;
 import com.devbrackets.android.exomedia.ExoMedia.RendererType;
+import com.devbrackets.android.exomedia.annotation.ExoPlayerState;
 import com.devbrackets.android.exomedia.core.listener.CaptionListener;
 import com.devbrackets.android.exomedia.core.listener.ExoPlayerListener;
 import com.devbrackets.android.exomedia.core.listener.InternalErrorListener;
@@ -410,6 +411,7 @@ public class ExoMediaPlayer implements ExoPlayer.EventListener {
         stayAwake(false);
     }
 
+    @ExoPlayerState
     public int getPlaybackState() {
         return player.getPlaybackState();
     }

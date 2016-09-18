@@ -50,6 +50,7 @@ import com.devbrackets.android.exomedia.core.video.scale.ScaleType;
 import com.devbrackets.android.exomedia.listener.OnBufferUpdateListener;
 import com.devbrackets.android.exomedia.listener.OnCompletionListener;
 import com.devbrackets.android.exomedia.listener.OnErrorListener;
+import com.devbrackets.android.exomedia.listener.OnPlaybackStateChangeListener;
 import com.devbrackets.android.exomedia.listener.OnPreparedListener;
 import com.devbrackets.android.exomedia.listener.OnSeekCompletionListener;
 import com.devbrackets.android.exomedia.listener.OnVideoSizeChangedListener;
@@ -662,6 +663,17 @@ public class VideoView extends RelativeLayout {
     public void setOnVideoSizedChangedListener(@Nullable OnVideoSizeChangedListener listener) {
         muxNotifier.videoSizeChangedListener = listener;
     }
+
+    /**
+     * Sets the listener to inform of playback state changes
+     *
+     * @param listener The listener
+     */
+    public void setOnPlaybackStateChangeListener(OnPlaybackStateChangeListener listener) {
+        listenerMux.setOnPlaybackStateChangeListener(listener);
+    }
+
+    //todo method to get the current state? (also in AudioPlayer)
 
     /**
      * Performs the functionality to setup the initial properties including
