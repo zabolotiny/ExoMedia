@@ -34,6 +34,7 @@ import com.devbrackets.android.exomedia.core.builder.HlsRenderBuilder;
 import com.devbrackets.android.exomedia.core.builder.RenderBuilder;
 import com.devbrackets.android.exomedia.core.builder.SmoothStreamRenderBuilder;
 import com.devbrackets.android.exomedia.core.exoplayer.EMExoPlayer;
+import com.devbrackets.android.exomedia.core.listener.CaptionListener;
 import com.devbrackets.android.exomedia.core.listener.Id3MetadataListener;
 import com.devbrackets.android.exomedia.core.video.ClearableSurface;
 import com.devbrackets.android.exomedia.listener.OnBufferUpdateListener;
@@ -44,6 +45,7 @@ import com.google.android.exoplayer.MediaFormat;
 import com.google.android.exoplayer.audio.AudioCapabilities;
 import com.google.android.exoplayer.audio.AudioCapabilitiesReceiver;
 import com.google.android.exoplayer.metadata.id3.Id3Frame;
+import com.google.android.exoplayer.text.Cue;
 
 import java.util.List;
 import java.util.Map;
@@ -238,6 +240,7 @@ public class ExoVideoDelegate implements AudioCapabilitiesReceiver.Listener {
     protected void initExoPlayer() {
         emExoPlayer = new EMExoPlayer(null);
 
+        emExoPlayer.setCaptionListener(internalListeners);
         emExoPlayer.setMetadataListener(internalListeners);
         emExoPlayer.setBufferUpdateListener(internalListeners);
     }
@@ -262,7 +265,12 @@ public class ExoVideoDelegate implements AudioCapabilitiesReceiver.Listener {
         }
     }
 
-    protected class InternalListeners implements Id3MetadataListener, OnBufferUpdateListener {
+    protected class InternalListeners implements CaptionListener, Id3MetadataListener, OnBufferUpdateListener {
+        @Override
+        public void onCues(List<Cue> cues) {
+            listenerMux.onCues(cues);
+        }
+
         @Override
         public void onId3Metadata(List<Id3Frame> metadata) {
             listenerMux.onId3Metadata(metadata);

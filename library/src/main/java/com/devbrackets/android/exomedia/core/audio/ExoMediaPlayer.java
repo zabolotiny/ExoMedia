@@ -35,6 +35,7 @@ import com.devbrackets.android.exomedia.core.builder.HlsRenderBuilder;
 import com.devbrackets.android.exomedia.core.builder.RenderBuilder;
 import com.devbrackets.android.exomedia.core.builder.SmoothStreamRenderBuilder;
 import com.devbrackets.android.exomedia.core.exoplayer.EMExoPlayer;
+import com.devbrackets.android.exomedia.core.listener.CaptionListener;
 import com.devbrackets.android.exomedia.core.listener.Id3MetadataListener;
 import com.devbrackets.android.exomedia.listener.OnBufferUpdateListener;
 import com.devbrackets.android.exomedia.type.MediaSourceType;
@@ -42,6 +43,7 @@ import com.devbrackets.android.exomedia.util.DrmProvider;
 import com.devbrackets.android.exomedia.util.MediaSourceUtil;
 import com.google.android.exoplayer.MediaFormat;
 import com.google.android.exoplayer.metadata.id3.Id3Frame;
+import com.google.android.exoplayer.text.Cue;
 
 import java.util.List;
 import java.util.Map;
@@ -71,6 +73,7 @@ public class ExoMediaPlayer implements MediaPlayerApi {
         this.context = context;
 
         emExoPlayer = new EMExoPlayer(null);
+        emExoPlayer.setCaptionListener(internalListeners);
         emExoPlayer.setMetadataListener(internalListeners);
         emExoPlayer.setBufferUpdateListener(internalListeners);
     }
@@ -263,7 +266,12 @@ public class ExoMediaPlayer implements MediaPlayerApi {
         return String.format(USER_AGENT_FORMAT, BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")", Build.VERSION.RELEASE, Build.MODEL);
     }
 
-    protected class InternalListeners implements Id3MetadataListener, OnBufferUpdateListener {
+    protected class InternalListeners implements CaptionListener, Id3MetadataListener, OnBufferUpdateListener {
+        @Override
+        public void onCues(List<Cue> cues) {
+            listenerMux.onCues(cues);
+        }
+
         @Override
         public void onId3Metadata(List<Id3Frame> metadata) {
             listenerMux.onId3Metadata(metadata);

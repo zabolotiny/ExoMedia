@@ -35,6 +35,7 @@ import com.devbrackets.android.exomedia.listener.OnCompletionListener;
 import com.devbrackets.android.exomedia.listener.OnErrorListener;
 import com.devbrackets.android.exomedia.listener.OnPreparedListener;
 import com.devbrackets.android.exomedia.listener.OnSeekCompletionListener;
+import com.devbrackets.android.exomedia.listener.SubtitleListener;
 import com.devbrackets.android.exomedia.util.DeviceUtil;
 import com.devbrackets.android.exomedia.util.DrmProvider;
 import com.google.android.exoplayer.MediaFormat;
@@ -370,6 +371,15 @@ public class EMAudioPlayer {
      */
     public void setId3MetadataListener(@Nullable Id3MetadataListener listener) {
         listenerMux.setId3MetadataListener(listener);
+    }
+
+    /**
+     * Sets the listener to inform of subtitle cues
+     *
+     * @param listener The listener to inform
+     */
+    public void setSubtitleListener(@Nullable SubtitleListener listener) {
+        listenerMux.setSubtitleListener(listener);
     }
 
     /**
