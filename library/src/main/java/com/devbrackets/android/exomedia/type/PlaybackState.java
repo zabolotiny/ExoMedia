@@ -16,14 +16,10 @@
 
 package com.devbrackets.android.exomedia.type;
 
-import com.google.android.exoplayer2.ExoPlayer;
-
 /**
  * States associated with the current media playback
  * state for the {@link com.devbrackets.android.exomedia.AudioPlayer}
  * and {@link com.devbrackets.android.exomedia.ui.widget.VideoView}
- *
- * TODO: layout a diagram of states and cleanup/finish documentation
  */
 public interface PlaybackState {
     /**

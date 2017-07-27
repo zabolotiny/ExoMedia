@@ -49,7 +49,7 @@ import java.lang.ref.WeakReference;
 public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener,
         MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnSeekCompleteListener, OnBufferUpdateListener, MetadataListener {
     //The amount of time the current position can be off the duration to call the onCompletion listener
-    private static final long COMPLETED_DURATION_LEEWAY = 1000;
+    private static final long COMPLETED_DURATION_LEEWAY = 1_000;
 
     @NonNull
     private Handler delayedHandler = new Handler();
