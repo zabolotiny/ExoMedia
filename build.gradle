@@ -4,7 +4,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.2'
+        classpath 'com.android.tools.build:gradle:3.0.0'
         classpath 'com.novoda:bintray-release:0.5.0'
     }
 }
@@ -14,4 +14,9 @@ allprojects {
         jcenter()
         google()
     }
+}
+
+ext {
+    exoPlayerVersion = "r2.5.4"
+    supportLibVersion = "27.0.0"
 }

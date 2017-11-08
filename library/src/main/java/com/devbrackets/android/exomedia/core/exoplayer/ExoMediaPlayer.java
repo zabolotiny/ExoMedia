@@ -51,8 +51,10 @@ import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.Renderer;
 import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.audio.AudioRendererEventListener;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
 import com.google.android.exoplayer2.drm.DefaultDrmSessionManager;
@@ -74,6 +76,7 @@ import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoRendererEventListener;
 
 import java.util.ArrayList;
@@ -85,7 +88,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @SuppressWarnings({"unused", "WeakerAccess"})
-public class ExoMediaPlayer implements ExoPlayer.EventListener {
+public class ExoMediaPlayer implements Player.EventListener {
     private static final String TAG = "ExoMediaPlayer";
     private static final int BUFFER_REPEAT_DELAY = 1_000;
     private static final int WAKE_LOCK_TIMEOUT = 1_000;
@@ -175,6 +178,11 @@ public class ExoMediaPlayer implements ExoPlayer.EventListener {
 
     @Override
     public void onLoadingChanged(boolean isLoading) {
+        // Purposefully left blank
+    }
+
+    @Override
+    public void onRepeatModeChanged(int repeatMode) {
         // Purposefully left blank
     }
 
@@ -278,7 +286,7 @@ public class ExoMediaPlayer implements ExoPlayer.EventListener {
      */
     @Nullable
     public Map<RendererType, TrackGroupArray> getAvailableTracks() {
-        if (getPlaybackState() == ExoPlayer.STATE_IDLE) {
+        if (getPlaybackState() == Player.STATE_IDLE) {
             return null;
         }
 
@@ -342,7 +350,17 @@ public class ExoMediaPlayer implements ExoPlayer.EventListener {
     }
 
     public void setAudioStreamType(int streamType) {
-        sendMessage(C.TRACK_TYPE_AUDIO, C.MSG_SET_STREAM_TYPE, streamType);
+        @C.AudioUsage
+        int usage = Util.getAudioUsageForStreamType(streamType);
+        @C.AudioContentType
+        int contentType = Util.getAudioContentTypeForStreamType(streamType);
+
+        AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                .setUsage(usage)
+                .setContentType(contentType)
+                .build();
+
+        sendMessage(C.TRACK_TYPE_AUDIO, C.MSG_SET_AUDIO_ATTRIBUTES, audioAttributes);
     }
 
     public void forcePrepare() {
@@ -389,7 +407,7 @@ public class ExoMediaPlayer implements ExoPlayer.EventListener {
      */
     public boolean restart() {
         int playbackState = getPlaybackState();
-        if (playbackState != ExoPlayer.STATE_IDLE && playbackState != ExoPlayer.STATE_ENDED) {
+        if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) {
             return false;
         }
 
@@ -568,18 +586,18 @@ public class ExoMediaPlayer implements ExoPlayer.EventListener {
             stateStore.setMostRecentState(playWhenReady, playbackState);
 
             //Makes sure the buffering notifications are sent
-            if (newState == ExoPlayer.STATE_READY) {
+            if (newState == Player.STATE_READY) {
                 setBufferRepeaterStarted(true);
-            } else if (newState == ExoPlayer.STATE_IDLE || newState == ExoPlayer.STATE_ENDED) {
+            } else if (newState == Player.STATE_IDLE || newState == Player.STATE_ENDED) {
                 setBufferRepeaterStarted(false);
             }
 
             //Because the playWhenReady isn't a state in itself, rather a flag to a state we will ignore informing of
             // see events when that is the only change.  Additionally, on some devices we get states ordered as
             // [seeking, ready, buffering, ready] while on others we get [seeking, buffering, ready]
-            boolean informSeekCompletion = stateStore.matchesHistory(new int[]{StateStore.STATE_SEEKING, ExoPlayer.STATE_BUFFERING, ExoPlayer.STATE_READY}, true);
-            informSeekCompletion |= stateStore.matchesHistory(new int[] {ExoPlayer.STATE_BUFFERING, StateStore.STATE_SEEKING, ExoPlayer.STATE_READY}, true);
-            informSeekCompletion |= stateStore.matchesHistory(new int[]{StateStore.STATE_SEEKING, ExoPlayer.STATE_READY, ExoPlayer.STATE_BUFFERING, ExoPlayer.STATE_READY}, true);
+            boolean informSeekCompletion = stateStore.matchesHistory(new int[]{StateStore.STATE_SEEKING, Player.STATE_BUFFERING, Player.STATE_READY}, true);
+            informSeekCompletion |= stateStore.matchesHistory(new int[] {Player.STATE_BUFFERING, StateStore.STATE_SEEKING, Player.STATE_READY}, true);
+            informSeekCompletion |= stateStore.matchesHistory(new int[]{StateStore.STATE_SEEKING, Player.STATE_READY, Player.STATE_BUFFERING, Player.STATE_READY}, true);
 
             for (ExoPlayerListener listener : listeners) {
                 listener.onStateChanged(playWhenReady, playbackState);
@@ -604,11 +622,11 @@ public class ExoMediaPlayer implements ExoPlayer.EventListener {
         public static final int STATE_SEEKING = 100;
 
         //We keep the last few states because that is all we need currently
-        private int[] prevStates = new int[]{ExoPlayer.STATE_IDLE, ExoPlayer.STATE_IDLE, ExoPlayer.STATE_IDLE, ExoPlayer.STATE_IDLE};
+        private int[] prevStates = new int[]{Player.STATE_IDLE, Player.STATE_IDLE, Player.STATE_IDLE, Player.STATE_IDLE};
 
         public void reset() {
             for (int i = 0; i < prevStates.length; i++) {
-                prevStates[i] = ExoPlayer.STATE_IDLE;
+                prevStates[i] = Player.STATE_IDLE;
             }
         }
 
