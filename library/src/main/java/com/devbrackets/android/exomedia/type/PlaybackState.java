@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Brian Wernick
+ * Copyright (C) 2016 - 2017 Brian Wernick
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ public interface PlaybackState {
     int STOPPED = 9;
 
     /**
-     * The player has been released and can no longer be reused (todo is this true)
+     * The player has been released and can no longer be reused
      */
     int RELEASED = 10;
 

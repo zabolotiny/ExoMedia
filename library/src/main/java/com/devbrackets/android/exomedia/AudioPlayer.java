@@ -23,6 +23,7 @@ import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.devbrackets.android.exomedia.annotation.PlaybackStateType;
 import com.devbrackets.android.exomedia.core.ListenerMux;
 import com.devbrackets.android.exomedia.core.api.AudioPlayerApi;
 import com.devbrackets.android.exomedia.core.audio.ExoAudioPlayer;
@@ -373,6 +374,11 @@ public class AudioPlayer {
      */
     public void setOnPlaybackStateChangeListener(OnPlaybackStateChangeListener listener) {
         listenerMux.setOnPlaybackStateChangeListener(listener);
+    }
+
+    @PlaybackStateType
+    public int getPlaybackState() {
+        return listenerMux.getPlaybackState();
     }
 
     /**

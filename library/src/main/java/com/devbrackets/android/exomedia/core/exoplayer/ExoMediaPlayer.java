@@ -398,6 +398,7 @@ public class ExoMediaPlayer implements Player.EventListener {
     public void seekTo(long positionMs) {
         player.seekTo(positionMs);
         stateStore.setMostRecentState(stateStore.isLastReportedPlayWhenReady(), StateStore.STATE_SEEKING);
+        //TODO: inform a listener that we are now seeking?
     }
 
     /**
@@ -577,6 +578,7 @@ public class ExoMediaPlayer implements Player.EventListener {
         }
     }
 
+    //TODO: instead of having the same ExoPlayer states, should we have our own that are then used instead?
     private void reportPlayerState() {
         boolean playWhenReady = player.getPlayWhenReady();
         int playbackState = getPlaybackState();

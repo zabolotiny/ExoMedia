@@ -22,10 +22,10 @@ import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.devbrackets.android.exomedia.core.exception.NativeMediaPlaybackException;
-import com.devbrackets.android.exomedia.core.exoplayer.ExoMediaPlayer;
 import com.devbrackets.android.exomedia.annotation.ExoPlayerState;
 import com.devbrackets.android.exomedia.annotation.PlaybackStateType;
+import com.devbrackets.android.exomedia.core.exception.NativeMediaPlaybackException;
+import com.devbrackets.android.exomedia.core.exoplayer.ExoMediaPlayer;
 import com.devbrackets.android.exomedia.core.listener.ExoPlayerListener;
 import com.devbrackets.android.exomedia.core.listener.MetadataListener;
 import com.devbrackets.android.exomedia.core.video.ClearableSurface;
@@ -36,7 +36,7 @@ import com.devbrackets.android.exomedia.listener.OnPlaybackStateChangeListener;
 import com.devbrackets.android.exomedia.listener.OnPreparedListener;
 import com.devbrackets.android.exomedia.listener.OnSeekCompletionListener;
 import com.devbrackets.android.exomedia.type.PlaybackState;
-import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.metadata.Metadata;
 
 import java.lang.ref.WeakReference;
@@ -73,6 +73,9 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
 
     @NonNull
     private WeakReference<ClearableSurface> clearableSurfaceRef = new WeakReference<>(null);
+
+    @PlaybackStateType
+    private int playbackState = PlaybackState.IDLE;
 
     private boolean notifiedPrepared = false;
     private boolean notifiedCompleted = false;
@@ -123,26 +126,27 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
 
     @Override
     public void onStateChanged(boolean playWhenReady, @ExoPlayerState int playbackState) {
-        notifyStateChange(playbackState); //todo the mapping is no longer valid
+        //TODO: How are the cases of seeking, preparing, etc. handled? (only IDLE, ERROR, COMPLETED, READY, BUFFERING are handled)
+        notifyStateChange(mapPlaybackState(playbackState));
 
         //Makes sure the ended and prepared listeners are notified
-        if (playbackState == ExoPlayer.STATE_ENDED) {
+        if (playbackState == Player.STATE_ENDED) {
             muxNotifier.onMediaPlaybackEnded();
 
             if (!notifiedCompleted) {
                 notifyCompletionListener();
             }
-        } else if (playbackState == ExoPlayer.STATE_READY && !notifiedPrepared) {
+        } else if (playbackState == Player.STATE_READY && !notifiedPrepared) {
             notifyPreparedListener();
         }
 
         //Updates the previewImage
-        if (playbackState == ExoPlayer.STATE_READY && playWhenReady) {
+        if (playbackState == Player.STATE_READY && playWhenReady) {
             muxNotifier.onPreviewImageStateChanged(false);
         }
 
         //Clears the textureView when requested
-        if (playbackState == ExoPlayer.STATE_IDLE && clearRequested) {
+        if (playbackState == Player.STATE_IDLE && clearRequested) {
             clearRequested = false;
             ClearableSurface clearableSurface = clearableSurfaceRef.get();
 
@@ -155,7 +159,9 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
 
     @Override
     public void onSeekComplete() {
+        notifyStateChange(PlaybackState.READY);
         muxNotifier.onSeekComplete();
+
         if (seekCompletionListener != null) {
             seekCompletionListener.onSeekComplete();
         }
@@ -256,6 +262,11 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
         stateChangeListener = listener;
     }
 
+    @PlaybackStateType
+    public int getPlaybackState() {
+        return playbackState;
+    }
+
     /**
      * Sets weather the listener was notified when we became prepared.
      *
@@ -286,9 +297,27 @@ public class ListenerMux implements ExoPlayerListener, MediaPlayer.OnPreparedLis
     }
 
     protected void notifyStateChange(@PlaybackStateType int state) {
+        playbackState = state;
+
         if (stateChangeListener != null) {
             stateChangeListener.onPlaybackStateChange(state);
         }
+    }
+
+    @PlaybackStateType
+    protected int mapPlaybackState(@ExoPlayerState int exoPlayerState) {
+        switch (exoPlayerState) {
+            case Player.STATE_IDLE:
+                return PlaybackState.IDLE;
+            case Player.STATE_BUFFERING:
+                return PlaybackState.BUFFERING;
+            case Player.STATE_ENDED:
+                return PlaybackState.COMPLETED;
+            case Player.STATE_READY:
+                return PlaybackState.READY;
+        }
+
+        return PlaybackState.IDLE;
     }
 
     private boolean notifyErrorListener(Exception e) {

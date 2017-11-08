@@ -41,6 +41,7 @@ import android.widget.RelativeLayout;
 
 import com.devbrackets.android.exomedia.ExoMedia;
 import com.devbrackets.android.exomedia.R;
+import com.devbrackets.android.exomedia.annotation.PlaybackStateType;
 import com.devbrackets.android.exomedia.core.ListenerMux;
 import com.devbrackets.android.exomedia.core.api.VideoViewApi;
 import com.devbrackets.android.exomedia.core.exoplayer.ExoMediaPlayer;
@@ -708,7 +709,10 @@ public class VideoView extends RelativeLayout {
         listenerMux.setOnPlaybackStateChangeListener(listener);
     }
 
-    //todo method to get the current state? (also in AudioPlayer)
+    @PlaybackStateType
+    public int getPlaybackState() {
+        return listenerMux.getPlaybackState();
+    }
 
     /**
      * Performs the functionality to setup the initial properties including
@@ -740,8 +744,8 @@ public class VideoView extends RelativeLayout {
     protected void initView(Context context, @NonNull AttributeContainer attributeContainer) {
         inflateVideoView(context, attributeContainer);
 
-        previewImageView = (ImageView) findViewById(R.id.exomedia_video_preview_image);
-        videoViewImpl = (VideoViewApi) findViewById(R.id.exomedia_video_view);
+        previewImageView = findViewById(R.id.exomedia_video_preview_image);
+        videoViewImpl = findViewById(R.id.exomedia_video_view);
 
         muxNotifier = new MuxNotifier();
         listenerMux = new ListenerMux(muxNotifier);
@@ -778,7 +782,7 @@ public class VideoView extends RelativeLayout {
      */
     protected void inflateVideoView(@NonNull Context context, @NonNull AttributeContainer attributeContainer) {
         View.inflate(context, R.layout.exomedia_video_view_layout, this);
-        ViewStub videoViewStub = (ViewStub) findViewById(R.id.video_view_api_impl_stub);
+        ViewStub videoViewStub = findViewById(R.id.video_view_api_impl_stub);
 
         videoViewStub.setLayoutResource(getVideoViewApiImplementation(context, attributeContainer));
         videoViewStub.inflate();
