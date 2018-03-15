@@ -1,1 +1,6 @@
 include ':library', ':demo'
+
+// ExoPlayer local source test (for RTSP)
+gradle.ext.exoplayerRoot = '/Users/brian/Documents/misc/Android/ExoPlayer-RTSP/ExoPlayer'
+gradle.ext.exoplayerModulePrefix = 'exoplayer-'
+apply from: new File(gradle.ext.exoplayerRoot, 'core_settings.gradle')

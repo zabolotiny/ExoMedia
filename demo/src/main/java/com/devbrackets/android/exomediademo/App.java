@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.devbrackets.android.exomedia.ExoMedia;
+import com.devbrackets.android.exomedia.core.source.MediaSourceProvider;
+import com.devbrackets.android.exomedia.core.source.builder.RtspMediaSourceBuilder;
 import com.devbrackets.android.exomediademo.manager.PlaylistManager;
 import com.google.android.exoplayer2.ext.okhttp.OkHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -14,7 +16,6 @@ import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
 import com.google.android.exoplayer2.upstream.cache.CacheDataSourceFactory;
 import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
 import com.google.android.exoplayer2.upstream.cache.SimpleCache;
-import com.squareup.leakcanary.LeakCanary;
 
 import java.io.File;
 
@@ -29,7 +30,7 @@ public class App extends Application {
         super.onCreate();
 
         playlistManager = new PlaylistManager(this);
-        LeakCanary.install(this);
+//        LeakCanary.install(this);
 
         configureExoMedia();
     }
@@ -40,6 +41,10 @@ public class App extends Application {
     }
 
     private void configureExoMedia() {
+        //TODO we'll need to change this only for RTSP otherwise we will be behind by a bit
+        ExoMedia.setLoadControl(RtspMediaSourceBuilder.rtspLoadControl);
+        ExoMedia.registerMediaSourceBuilder(new MediaSourceProvider.SourceTypeBuilder(new RtspMediaSourceBuilder(), "rtsp", null, null));
+
         // Registers the media sources to use the OkHttp client instead of the standard Apache one
         // Note: the OkHttpDataSourceFactory can be found in the ExoPlayer extension library `extension-okhttp`
         ExoMedia.setDataSourceFactoryProvider(new ExoMedia.DataSourceFactoryProvider() {

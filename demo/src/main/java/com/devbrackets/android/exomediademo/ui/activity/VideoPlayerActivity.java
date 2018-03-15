@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import com.devbrackets.android.exomedia.listener.VideoControlsSeekListener;
+import com.devbrackets.android.exomedia.ui.widget.VideoControls;
 import com.devbrackets.android.exomedia.ui.widget.VideoView;
 import com.devbrackets.android.exomediademo.App;
 import com.devbrackets.android.exomediademo.R;
@@ -71,14 +72,21 @@ public class VideoPlayerActivity extends Activity implements VideoControlsSeekLi
 
     protected void init() {
         setupPlaylistManager();
-
-        videoView = findViewById(R.id.video_play_activity_video_view);
-        videoView.setHandleAudioFocus(false);
-        videoView.getVideoControls().setSeekListener(this);
+        setupVideoView();
 
         videoApi = new VideoApi(videoView);
         playlistManager.addVideoApi(videoApi);
         playlistManager.play(0, false);
+    }
+
+    protected void setupVideoView() {
+        videoView = findViewById(R.id.video_play_activity_video_view);
+        videoView.setHandleAudioFocus(false);
+
+        VideoControls controls = (VideoControls) videoView.getVideoControlsCore();
+        if (controls != null) {
+            controls.setSeekListener(this);
+        }
     }
 
     /**

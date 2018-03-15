@@ -26,6 +26,8 @@ public class Samples {
 
         //Video items
         videoSamples = new ArrayList<>();
+        videoSamples.add(new Sample("RTSP", "rtsp://user:WbEyTVniRfmaRunILLLmJQ@192.168.1.126:8554/Video-33"));
+
         videoSamples.add(new Sample("FLV - Big Buck Bunny by Blender", "http://vod.leasewebcdn.com/bbb.flv?ri=1024&rs=150&start=0"));
         videoSamples.add(new Sample("HLS - ArtBeats", "http://cdn-fms.rbs.com.br/vod/hls_sample1_manifest.m3u8"));
         videoSamples.add(new Sample("HLS - Sintel by Blender", "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8"));

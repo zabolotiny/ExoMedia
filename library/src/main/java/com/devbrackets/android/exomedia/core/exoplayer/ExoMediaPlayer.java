@@ -31,6 +31,9 @@ import android.support.annotation.Size;
 import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.TextureView;
 
 import com.devbrackets.android.exomedia.ExoMedia;
 import com.devbrackets.android.exomedia.ExoMedia.RendererType;
@@ -73,6 +76,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.MappingTrackSelector;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.video.VideoListener;
 import com.google.android.exoplayer2.video.VideoRendererEventListener;
 
 import java.util.ArrayList;
@@ -158,7 +162,7 @@ public class ExoMediaPlayer extends Player.DefaultEventListener {
         trackSelector = new DefaultTrackSelector(adaptiveTrackSelectionFactory);
 
         LoadControl loadControl = ExoMedia.Data.loadControl != null ? ExoMedia.Data.loadControl : new DefaultLoadControl();
-        player = ExoPlayerFactory.newInstance(renderers.toArray(new Renderer[renderers.size()]), trackSelector, loadControl);
+        player = ExoPlayerFactory.newInstance(renderers.toArray(new Renderer[renderers.size()]), trackSelector, loadControl, new EmptyVideoComponent());
         player.addListener(this);
     }
 
@@ -765,6 +769,75 @@ public class ExoMediaPlayer extends Player.DefaultEventListener {
             if (internalErrorListener != null) {
                 internalErrorListener.onDrmSessionManagerError(e);
             }
+        }
+    }
+
+    //TODO: RTSP requires this, what is the actual implementation we should have?
+    private class EmptyVideoComponent implements Player.VideoComponent {
+
+        @Override
+        public void setVideoScalingMode(int videoScalingMode) {
+
+        }
+
+        @Override
+        public int getVideoScalingMode() {
+            return C.VIDEO_SCALING_MODE_SCALE_TO_FIT;
+        }
+
+        @Override
+        public void addVideoListener(VideoListener listener) {
+
+        }
+
+        @Override
+        public void removeVideoListener(VideoListener listener) {
+
+        }
+
+        @Override
+        public void clearVideoSurface() {
+
+        }
+
+        @Override
+        public void setVideoSurface(Surface surface) {
+
+        }
+
+        @Override
+        public void clearVideoSurface(Surface surface) {
+
+        }
+
+        @Override
+        public void setVideoSurfaceHolder(SurfaceHolder surfaceHolder) {
+
+        }
+
+        @Override
+        public void clearVideoSurfaceHolder(SurfaceHolder surfaceHolder) {
+
+        }
+
+        @Override
+        public void setVideoSurfaceView(SurfaceView surfaceView) {
+
+        }
+
+        @Override
+        public void clearVideoSurfaceView(SurfaceView surfaceView) {
+
+        }
+
+        @Override
+        public void setVideoTextureView(TextureView textureView) {
+
+        }
+
+        @Override
+        public void clearVideoTextureView(TextureView textureView) {
+
         }
     }
 
