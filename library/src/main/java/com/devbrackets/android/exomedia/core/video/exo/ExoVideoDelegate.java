@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Brian Wernick
+ * Copyright (C) 2016 - 2018 ExoMedia Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import android.view.Surface;
 import com.devbrackets.android.exomedia.ExoMedia;
 import com.devbrackets.android.exomedia.core.ListenerMux;
 import com.devbrackets.android.exomedia.core.exoplayer.ExoMediaPlayer;
+import com.devbrackets.android.exomedia.core.exoplayer.WindowInfo;
 import com.devbrackets.android.exomedia.core.listener.MetadataListener;
 import com.devbrackets.android.exomedia.core.video.ClearableSurface;
 import com.devbrackets.android.exomedia.listener.OnBufferUpdateListener;
@@ -100,6 +101,11 @@ public class ExoVideoDelegate {
         return true;
     }
 
+    @FloatRange(from = 0.0, to = 1.0)
+    public float getVolume() {
+        return exoMediaPlayer.getVolume();
+    }
+
     public boolean setVolume(@FloatRange(from = 0.0, to = 1.0) float volume) {
         exoMediaPlayer.setVolume(volume);
         return true;
@@ -163,12 +169,25 @@ public class ExoVideoDelegate {
         return exoMediaPlayer.getBufferedPercentage();
     }
 
+    @Nullable
+    public WindowInfo getWindowInfo() {
+        return exoMediaPlayer.getWindowInfo();
+    }
+
     public boolean trackSelectionAvailable() {
         return true;
     }
 
+    /**
+     * @deprecated use {@link #setTrack(ExoMedia.RendererType, int, int)}
+     */
+    @Deprecated
     public void setTrack(ExoMedia.RendererType trackType, int trackIndex) {
         exoMediaPlayer.setSelectedTrack(trackType, trackIndex);
+    }
+
+    public void setTrack(@NonNull ExoMedia.RendererType trackType, int groupIndex, int trackIndex) {
+        exoMediaPlayer.setSelectedTrack(trackType, groupIndex, trackIndex);
     }
 
     @Nullable
@@ -176,8 +195,16 @@ public class ExoVideoDelegate {
         return exoMediaPlayer.getAvailableTracks();
     }
 
+    public void setRendererEnabled(@NonNull ExoMedia.RendererType type, boolean enabled) {
+        exoMediaPlayer.setRendererEnabled(type, enabled);
+    }
+
     public boolean setPlaybackSpeed(float speed) {
         return exoMediaPlayer.setPlaybackSpeed(speed);
+    }
+
+    public float getPlaybackSpeed() {
+        return exoMediaPlayer.getPlaybackSpeed();
     }
 
     public void release() {
@@ -187,10 +214,16 @@ public class ExoVideoDelegate {
     public void setListenerMux(ListenerMux listenerMux) {
         if (this.listenerMux != null) {
             exoMediaPlayer.removeListener(this.listenerMux);
+            exoMediaPlayer.removeAnalyticsListener(this.listenerMux);
         }
 
         this.listenerMux = listenerMux;
         exoMediaPlayer.addListener(listenerMux);
+        exoMediaPlayer.addAnalyticsListener(listenerMux);
+    }
+
+    public void setRepeatMode(int repeatMode) {
+        exoMediaPlayer.setRepeatMode(repeatMode);
     }
 
     public void onSurfaceReady(Surface surface) {
@@ -201,7 +234,7 @@ public class ExoVideoDelegate {
     }
 
     public void onSurfaceDestroyed() {
-        exoMediaPlayer.blockingClearSurface();
+        exoMediaPlayer.clearSurface();
     }
 
     protected void setup() {

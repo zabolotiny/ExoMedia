@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Brian Wernick
+ * Copyright (C) 2016 - 2018 ExoMedia Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ import com.devbrackets.android.exomedia.annotation.PlaybackStateType;
 import com.devbrackets.android.exomedia.core.ListenerMux;
 import com.devbrackets.android.exomedia.core.api.VideoViewApi;
 import com.devbrackets.android.exomedia.core.exoplayer.ExoMediaPlayer;
+import com.devbrackets.android.exomedia.core.exoplayer.WindowInfo;
 import com.devbrackets.android.exomedia.core.listener.MetadataListener;
 import com.devbrackets.android.exomedia.core.video.exo.ExoTextureVideoView;
 import com.devbrackets.android.exomedia.core.video.mp.NativeTextureVideoView;
@@ -58,6 +59,8 @@ import com.devbrackets.android.exomedia.listener.OnSeekCompletionListener;
 import com.devbrackets.android.exomedia.listener.OnVideoSizeChangedListener;
 import com.devbrackets.android.exomedia.util.DeviceUtil;
 import com.devbrackets.android.exomedia.util.StopWatch;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.analytics.AnalyticsListener;
 import com.google.android.exoplayer2.drm.MediaDrmCallback;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -78,7 +81,7 @@ public class VideoView extends RelativeLayout {
     private static final String TAG = VideoView.class.getSimpleName();
 
     @Nullable
-    protected VideoControls videoControls;
+    protected VideoControlsCore videoControls;
     protected ImageView previewImageView;
 
     protected Uri videoUri;
@@ -93,6 +96,7 @@ public class VideoView extends RelativeLayout {
     protected long overriddenDuration = -1;
 
     protected boolean overridePosition = false;
+    protected boolean matchOverridePositionSpeed = true;
     protected StopWatch overriddenPositionStopWatch = new StopWatch();
 
     protected MuxNotifier muxNotifier = new MuxNotifier();
@@ -158,7 +162,11 @@ public class VideoView extends RelativeLayout {
      * {@link #setReleaseOnDetachFromWindow(boolean)} has been set.
      */
     public void release() {
-        videoControls = null;
+        if (videoControls != null) {
+            videoControls.onDetachedFromView(this);
+            videoControls = null;
+        }
+
         stopPlayback();
         overriddenPositionStopWatch.stop();
 
@@ -218,15 +226,22 @@ public class VideoView extends RelativeLayout {
         return previewImageView;
     }
 
+    /**
+     * @deprecated Use {@link #setControls(VideoControlsCore)}
+     */
+    @Deprecated
     public void setControls(@Nullable VideoControls controls) {
+        setControls((VideoControlsCore) controls);
+    }
+
+    public void setControls(@Nullable VideoControlsCore controls) {
         if (videoControls != null && videoControls != controls) {
-            removeView(videoControls);
+            videoControls.onDetachedFromView(this);
         }
 
-        if (controls != null) {
-            videoControls = controls;
-            controls.setVideoView(this);
-            addView(controls);
+        videoControls = controls;
+        if (videoControls != null) {
+            videoControls.onAttachedToView(this);
         }
 
         //Sets the onTouch listener to show the controls
@@ -243,7 +258,7 @@ public class VideoView extends RelativeLayout {
             videoControls.show();
 
             if (isPlaying()) {
-                videoControls.hideDelayed();
+                videoControls.hide(true);
             }
         }
     }
@@ -255,9 +270,21 @@ public class VideoView extends RelativeLayout {
      * null
      *
      * @return The video controls being used by this view or null
+     * @deprecated Use {@link #getVideoControlsCore()}
      */
     @Nullable
+    @Deprecated
     public VideoControls getVideoControls() {
+        if (videoControls != null && videoControls instanceof VideoControls) {
+            return (VideoControls) videoControls;
+        }
+
+        return null;
+    }
+
+    // TODO: Rename this to getVideoControls when we remove the other method of that name
+    @Nullable
+    public VideoControlsCore getVideoControlsCore() {
         return videoControls;
     }
 
@@ -321,6 +348,15 @@ public class VideoView extends RelativeLayout {
      */
     public void setDrmCallback(@Nullable MediaDrmCallback drmCallback) {
         videoViewImpl.setDrmCallback(drmCallback);
+    }
+
+    /**
+     * Retrieves the current media volume
+     *
+     * @return The volume for the media
+     */
+    public float getVolume() {
+        return videoViewImpl.getVolume();
     }
 
     /**
@@ -497,7 +533,7 @@ public class VideoView extends RelativeLayout {
      */
     public long getCurrentPosition() {
         if (overridePosition) {
-            return positionOffset + overriddenPositionStopWatch.getTimeInt();
+            return positionOffset + overriddenPositionStopWatch.getTime();
         }
 
         return positionOffset + videoViewImpl.getCurrentPosition();
@@ -522,8 +558,8 @@ public class VideoView extends RelativeLayout {
     }
 
     /**
-     * Sets if the audio position should be overridden, allowing the time to be restarted at will.  This
-     * is useful for streaming audio where the audio doesn't have breaks between songs.
+     * Sets if the position should be overridden, allowing the time to be restarted at will.  This
+     * is useful for streaming media where the media doesn't have breaks between songs.
      *
      * @param override True if the position should be overridden
      */
@@ -538,6 +574,24 @@ public class VideoView extends RelativeLayout {
     }
 
     /**
+     * If set the overridden position will use the same playback rate as the
+     * media in playback.
+     *
+     * @param match <code>true</code> to match the playback speed
+     */
+    public void setOverridePositionMatchesPlaybackSpeed(boolean match) {
+        if (match != matchOverridePositionSpeed) {
+            matchOverridePositionSpeed = match;
+            if (match) {
+                overriddenPositionStopWatch.setSpeedMultiplier(getPlaybackSpeed());
+            } else {
+                // Defaults to 1x when disabled
+                overriddenPositionStopWatch.setSpeedMultiplier(1F);
+            }
+        }
+    }
+
+    /**
      * Retrieves the current buffer percent of the video.  If a video is not currently
      * prepared or buffering the value will be 0.  This should only be called after the video is
      * prepared (see {@link #setOnPreparedListener(OnPreparedListener)})
@@ -549,13 +603,49 @@ public class VideoView extends RelativeLayout {
     }
 
     /**
+     * Retrieves the information associated with the current {@link com.google.android.exoplayer2.Timeline.Window}
+     * used by the ExoPlayer backed implementation. When the {@link android.media.MediaPlayer} backed
+     * implementation is being used this will be null.
+     *
+     * @return The current Window information or null
+     */
+    @Nullable
+    public WindowInfo getWindowInfo() {
+        return videoViewImpl.getWindowInfo();
+    }
+
+    /**
+     * Sets the repeat mode for this MediaPlayer.
+     * <b>Note:</b> This will only change the ExoPlayer implementation
+     *
+     * @param repeatMode The repeat mode to use
+     */
+    public void setRepeatMode(@Player.RepeatMode int repeatMode) {
+        videoViewImpl.setRepeatMode(repeatMode);
+    }
+
+    /**
      * Sets the playback speed for this MediaPlayer.
      *
      * @param speed The speed to play the media back at
      * @return True if the speed was set
      */
     public boolean setPlaybackSpeed(float speed) {
-        return videoViewImpl.setPlaybackSpeed(speed);
+        boolean wasSet = videoViewImpl.setPlaybackSpeed(speed);
+        if (wasSet && matchOverridePositionSpeed) {
+            overriddenPositionStopWatch.setSpeedMultiplier(speed);
+        }
+
+        return wasSet;
+    }
+
+    /**
+     * Retrieves the current speed the media is playing at.
+     *
+     * @return The current playback speed
+     */
+    public float getPlaybackSpeed() {
+        return videoViewImpl.getPlaybackSpeed();
     }
 
     /**
@@ -574,9 +664,23 @@ public class VideoView extends RelativeLayout {
      *
      * @param trackType The type for the track to switch to the selected index
      * @param trackIndex The index for the track to switch to
+     * @deprecated Use {@link #setTrack(ExoMedia.RendererType, int, int)}
      */
+    @Deprecated
     public void setTrack(ExoMedia.RendererType trackType, int trackIndex) {
         videoViewImpl.setTrack(trackType, trackIndex);
+    }
+
+    /**
+     * Changes to the track with <code>trackIndex</code> for the specified
+     * <code>trackType</code>
+     *
+     * @param trackType The type for the track to switch to the selected index
+     * @param groupIndex The index for the group in the {@link TrackGroupArray} specified by the <code>trackType</code>
+     * @param trackIndex The index for the track to switch to
+     */
+    public void setTrack(ExoMedia.RendererType trackType, int groupIndex, int trackIndex) {
+        videoViewImpl.setTrack(trackType, groupIndex, trackIndex);
     }
 
     /**
@@ -588,6 +692,17 @@ public class VideoView extends RelativeLayout {
     @Nullable
     public Map<ExoMedia.RendererType, TrackGroupArray> getAvailableTracks() {
         return videoViewImpl.getAvailableTracks();
+    }
+
+    /**
+     * Enables or disables the track associated with the <code>type</code>. Note, by default all
+     * tracks are enabled
+     *
+     * @param type The {@link com.devbrackets.android.exomedia.ExoMedia.RendererType} to enable or disable the track for
+     * @param enabled <code>true</code> if the track should be enabled.
+     */
+    public void setRendererEnabled(@NonNull ExoMedia.RendererType type, boolean enabled) {
+        videoViewImpl.setRendererEnabled(type, enabled);
     }
 
     /**
@@ -672,6 +787,15 @@ public class VideoView extends RelativeLayout {
     }
 
     /**
+     * Sets the listener to inform of Analytics updates
+     *
+     * @param listener The listener to inform
+     */
+    public void setAnalyticsListener(@Nullable AnalyticsListener listener) {
+        listenerMux.setAnalyticsListener(listener);
+    }
+
+    /**
      * Sets the listener to inform of video size changes
      *
      * @param listener The listener
@@ -684,7 +808,7 @@ public class VideoView extends RelativeLayout {
      * Returns a {@link Bitmap} representation of the current contents of the
      * view. If the surface isn't ready or we cannot access it for some reason then
      * <code>null</code> will be returned instead.
-     *
+     * <p>
      * <b>NOTE:</b> Only the <code>TextureView</code> implementations support getting the bitmap
      * meaning that if the backing implementation is a <code>SurfaceView</code> then the result
      * will always be <code>null</code>
@@ -961,10 +1085,10 @@ public class VideoView extends RelativeLayout {
         public void onVideoSizeChanged(int width, int height, int unAppliedRotationDegrees, float pixelWidthHeightRatio) {
             //NOTE: Android 5.0+ will always have an unAppliedRotationDegrees of 0 (ExoPlayer already handles it)
             videoViewImpl.setVideoRotation(unAppliedRotationDegrees, false);
-            videoViewImpl.onVideoSizeChanged(width, height);
+            videoViewImpl.onVideoSizeChanged(width, height, pixelWidthHeightRatio);
 
             if (videoSizeChangedListener != null) {
-                videoSizeChangedListener.onVideoSizeChanged(width, height);
+                videoSizeChangedListener.onVideoSizeChanged(width, height, pixelWidthHeightRatio);
             }
         }
 
@@ -1004,7 +1128,7 @@ public class VideoView extends RelativeLayout {
         public boolean onSingleTapConfirmed(MotionEvent event) {
             // Toggles between hiding and showing the controls
             if (videoControls != null && videoControls.isVisible()) {
-                videoControls.hide();
+                videoControls.hide(false);
             } else {
                 showControls();
             }

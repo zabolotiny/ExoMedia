@@ -3,30 +3,30 @@ apply plugin: 'maven'
 apply plugin: 'com.novoda.bintray-release'
 
 def versionMajor = 4
-def versionMinor = 1
-def versionPatch = 0
+def versionMinor = 2
+def versionPatch = 3
 
 def libraryGroupId = 'com.devbrackets.android'
 def libraryBaseName = 'exomedia'
 def libraryVersion = "${versionMajor}.${versionMinor}.${versionPatch}"
 
 dependencies {
-    compile "com.android.support:support-media-compat:$rootProject.ext.supportLibVersion"
-    compile "com.android.support:appcompat-v7:$rootProject.ext.supportLibVersion"
+    implementation "com.android.support:support-media-compat:$rootProject.ext.supportLibVersion"
+    implementation "com.android.support:appcompat-v7:$rootProject.ext.supportLibVersion"
 
     // ExoPlayer
-    compile "com.google.android.exoplayer:exoplayer-core:$rootProject.ext.exoPlayerVersion"
-    compile "com.google.android.exoplayer:exoplayer-dash:$rootProject.ext.exoPlayerVersion"
-    compile "com.google.android.exoplayer:exoplayer-hls:$rootProject.ext.exoPlayerVersion"
-    compile "com.google.android.exoplayer:exoplayer-smoothstreaming:$rootProject.ext.exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-core:$rootProject.ext.exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-dash:$rootProject.ext.exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-hls:$rootProject.ext.exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-smoothstreaming:$rootProject.ext.exoPlayerVersion"
 }
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 28
 
         versionCode versionMajor * 10000 + versionMinor * 1000 + versionPatch * 100
         versionName "${versionMajor}.${versionMinor}.${versionPatch}"
@@ -61,10 +61,12 @@ uploadArchives {
 
 // ======= BINTRAY DEPLOY (command: $ ./gradlew clean build bintrayUpload -PbintrayUser=BINTRAY_USERNAME -PbintrayKey=BINTRAY_KEY -PdryRun=false) ====
 publish {
+    userOrg = ""
     groupId = libraryGroupId
     artifactId = libraryBaseName
     uploadName = 'ExoMedia'
-    version = libraryVersion
+    publishVersion = libraryVersion
+    desc = ""
     autoPublish = false
     dryRun = false
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Brian Wernick,
+ * Copyright (C) 2016 - 2017 ExoMedia Contributors,
  * Copyright (C) 2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -114,7 +114,7 @@ public class ResizingSurfaceView extends SurfaceView implements ClearableSurface
 
     // This is purposefully true to support older devices (below API 21) which
     // isn't needed by the ResizingTextureView (which is false be default)
-    protected boolean measureBasedOnAspectRatio = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP;
+    protected boolean measureBasedOnAspectRatio = true;
 
     public ResizingSurfaceView(Context context) {
         super(context);
