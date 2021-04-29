@@ -75,7 +75,7 @@ public class EMVideoView extends RelativeLayout {
     private static final String TAG = EMVideoView.class.getSimpleName();
 
     @Nullable
-    protected VideoControls videoControls;
+    public VideoControls videoControls;
     protected ImageView previewImageView;
 
     protected Uri videoUri;

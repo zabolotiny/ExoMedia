@@ -61,11 +61,11 @@ public abstract class VideoControls extends RelativeLayout {
     protected TextView subTitleView;
     protected TextView descriptionView;
 
-    protected ImageButton playPauseButton;
-    protected ImageButton previousButton;
-    protected ImageButton nextButton;
+    public ImageButton playPauseButton;
+    public ImageButton previousButton;
+    public ImageButton nextButton;
 
-    protected ProgressBar loadingProgress;
+    public ProgressBar loadingProgress;
 
     protected ViewGroup controlsContainer;
     protected ViewGroup textContainer;
