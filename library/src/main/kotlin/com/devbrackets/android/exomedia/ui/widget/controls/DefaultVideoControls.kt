@@ -37,6 +37,7 @@ import com.devbrackets.android.exomedia.ui.listener.VideoControlsSeekListener
 import com.devbrackets.android.exomedia.ui.listener.VideoControlsVisibilityListener
 import com.devbrackets.android.exomedia.ui.widget.VideoView
 import com.devbrackets.android.exomedia.util.Repeater
+import com.devbrackets.android.exomedia.util.millisToFormattedTimeContentDescription
 import com.devbrackets.android.exomedia.util.millisToFormattedTimeString
 import com.devbrackets.android.exomedia.util.tintListCompat
 import java.util.*
@@ -49,7 +50,7 @@ import kotlin.math.abs
 abstract class DefaultVideoControls : RelativeLayout, VideoControls {
   companion object {
     @JvmStatic
-    val DEFAULT_CONTROL_HIDE_DELAY = 2000
+    val DEFAULT_CONTROL_HIDE_DELAY = 5000
 
     @JvmStatic
     protected val CONTROL_VISIBILITY_ANIMATION_LENGTH: Long = 300
@@ -193,6 +194,7 @@ abstract class DefaultVideoControls : RelativeLayout, VideoControls {
       lastUpdatedPosition = position
 
       currentTimeTextView.text = position.millisToFormattedTimeString()
+      currentTimeTextView.contentDescription = position.millisToFormattedTimeContentDescription(context)
     }
   }
 
@@ -341,6 +343,12 @@ abstract class DefaultVideoControls : RelativeLayout, VideoControls {
    */
   fun updatePlayPauseImage(isPlaying: Boolean) {
     playPauseButton.setImageDrawable(if (isPlaying) pauseDrawable else playDrawable)
+    playPauseButton.contentDescription = context.getString(
+      if (isPlaying)
+        R.string.content_description_button_pause
+      else
+        R.string.content_description_button_play
+    )
   }
 
   /**

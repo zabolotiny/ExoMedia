@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.SeekBar
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
+import com.devbrackets.android.exomedia.util.millisToFormattedTimeContentDescription
 import com.devbrackets.android.exomedia.util.millisToFormattedTimeString
 import com.devbrackets.android.exomediademo.App
 import com.devbrackets.android.exomediademo.R
@@ -98,6 +99,7 @@ class AudioPlayerActivity : AppCompatActivity(), PlaylistListener<MediaItem>, Pr
             seekBar.secondaryProgress = (mediaProgress.duration * mediaProgress.bufferPercentFloat).toInt()
             seekBar.progress = mediaProgress.position.toInt()
             currentPositionView.text = mediaProgress.position.millisToFormattedTimeString()
+            currentPositionView.contentDescription = mediaProgress.position.millisToFormattedTimeContentDescription(this)
         }
 
         return true
@@ -184,6 +186,7 @@ class AudioPlayerActivity : AppCompatActivity(), PlaylistListener<MediaItem>, Pr
     private fun setDuration(duration: Long) {
         seekBar.max = duration.toInt()
         durationView.text = duration.millisToFormattedTimeString()
+        durationView.contentDescription = duration.millisToFormattedTimeContentDescription(this)
     }
 
     /**
@@ -248,6 +251,7 @@ class AudioPlayerActivity : AppCompatActivity(), PlaylistListener<MediaItem>, Pr
 
             seekPosition = progress
             currentPositionView.text = progress.toLong().millisToFormattedTimeString()
+            currentPositionView.contentDescription = progress.toLong().millisToFormattedTimeContentDescription(this@AudioPlayerActivity)
         }
 
         override fun onStartTrackingTouch(seekBar: SeekBar) {

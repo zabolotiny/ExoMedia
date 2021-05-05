@@ -16,7 +16,9 @@
 
 package com.devbrackets.android.exomedia.util
 
+import android.content.Context
 import android.text.format.DateUtils
+import com.devbrackets.android.exomedia.R
 
 /**
  * Formats the specified milliseconds to a human readable format
@@ -38,4 +40,16 @@ fun Long.millisToFormattedTimeString(): String {
     "%d:%02d:%02d".format(hours, minutes, seconds)
   } else "%02d:%02d".format(minutes, seconds)
 
+}
+fun Long.millisToFormattedTimeContentDescription(context: Context): String {
+  if (this < 0) {
+    return "--:--"
+  }
+  val seconds = this % DateUtils.MINUTE_IN_MILLIS / DateUtils.SECOND_IN_MILLIS
+  val minutes = this % DateUtils.HOUR_IN_MILLIS / DateUtils.MINUTE_IN_MILLIS
+  val hours = this % DateUtils.DAY_IN_MILLIS / DateUtils.HOUR_IN_MILLIS
+
+  return if (hours > 0) {
+    context.getString(R.string.content_description_time_hms, hours, minutes, seconds)
+  } else context.getString(R.string.content_description_time_ms, minutes, seconds)
 }

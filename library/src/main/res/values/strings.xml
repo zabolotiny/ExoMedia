@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_description_button_previous">Previous</string>
+    <string name="content_description_button_play">Play</string>
+    <string name="content_description_button_next">Next</string>
+    <string name="content_description_button_pause">Pause</string>
+    <string name="content_description_time_hms">%1$d hr %2$d min %3$d sec</string>
+    <string name="content_description_time_ms">%1$d min %2$d sec</string>
+</resources>

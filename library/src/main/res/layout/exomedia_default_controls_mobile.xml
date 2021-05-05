@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:importantForAccessibility="yes"
     android:layout_height="match_parent">
 
     <LinearLayout
@@ -27,6 +28,7 @@
             android:textColor="@android:color/white"
             android:textSize="16sp"
             android:textStyle="bold"
+            android:importantForAccessibility="yes"
             tools:text="The Video Title"/>
 
         <TextView
@@ -35,6 +37,7 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             android:textSize="14sp"
+            android:importantForAccessibility="yes"
             tools:text="The Video Album"/>
 
         <TextView
@@ -43,6 +46,7 @@
             android:layout_height="wrap_content"
             android:textColor="@android:color/white"
             android:textSize="14sp"
+            android:importantForAccessibility="yes"
             tools:text="The Video Artist"/>
     </LinearLayout>
 
@@ -51,7 +55,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:background="@drawable/exomedia_default_controls_interactive_background"
         android:orientation="vertical"
@@ -74,6 +77,7 @@
                 android:paddingRight="2dp"
                 android:textColor="@android:color/white"
                 android:typeface="monospace"
+                android:importantForAccessibility="yes"
                 tools:ignore="RtlHardcoded"
                 tools:text="1:06:29"/>
 
@@ -82,6 +86,7 @@
                 style="?android:seekBarStyle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:importantForAccessibility="yes"
                 android:layout_weight="1"
                 tools:ignore="RtlHardcoded"/>
 
@@ -94,6 +99,7 @@
                 android:textColor="@android:color/white"
                 android:typeface="monospace"
                 tools:ignore="RtlHardcoded"
+                android:importantForAccessibility="yes"
                 tools:text="1:23:49"/>
 
             <LinearLayout
@@ -121,8 +127,10 @@
                 android:minHeight="@dimen/exomedia_min_button_height"
                 android:minWidth="@dimen/exomedia_min_button_height"
                 android:visibility="gone"
+                android:importantForAccessibility="yes"
+                android:contentDescription="@string/content_description_button_previous"
                 app:srcCompat="@drawable/exomedia_ic_skip_previous_white"
-                tools:ignore="ContentDescription,RtlHardcoded"
+                tools:ignore="RtlHardcoded"
                 tools:visibility="visible"/>
 
             <ImageButton
@@ -132,8 +140,10 @@
                 android:background="@android:color/transparent"
                 android:minHeight="@dimen/exomedia_min_button_height"
                 android:minWidth="@dimen/exomedia_min_button_height"
+                android:contentDescription="@string/content_description_button_play"
+                android:importantForAccessibility="yes"
                 app:srcCompat="@drawable/exomedia_ic_play_arrow_white"
-                tools:ignore="ContentDescription"/>
+                />
 
             <ImageButton
                 android:id="@+id/exomedia_controls_next_btn"
@@ -143,9 +153,11 @@
                 android:background="@android:color/transparent"
                 android:minHeight="@dimen/exomedia_min_button_height"
                 android:minWidth="@dimen/exomedia_min_button_height"
+                android:importantForAccessibility="yes"
                 android:visibility="gone"
+                android:contentDescription="@string/content_description_button_next"
                 app:srcCompat="@drawable/exomedia_ic_skip_next_white"
-                tools:ignore="ContentDescription,RtlHardcoded"
+                tools:ignore="RtlHardcoded"
                 tools:visibility="visible"/>
         </LinearLayout>
     </LinearLayout>

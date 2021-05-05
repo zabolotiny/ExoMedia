@@ -26,6 +26,7 @@ import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.view.*
 import android.widget.ImageView
 import android.widget.RelativeLayout
@@ -731,6 +732,8 @@ open class VideoView : RelativeLayout {
     if (isInEditMode) {
       return
     }
+    isFocusable = true
+    isFocusableInTouchMode = true
 
     val attributes = VideoViewAttributeParser().parse(context, attrs)
     audioManager = context.applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
