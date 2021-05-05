@@ -266,7 +266,6 @@ class VideoControlsMobile : DefaultVideoControls {
 
     override fun setup(context: Context) {
         super.setup(context)
-        isFocusable = true
         updateDelegates()
     }
 
