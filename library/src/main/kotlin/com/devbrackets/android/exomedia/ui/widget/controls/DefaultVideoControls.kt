@@ -19,9 +19,7 @@ package com.devbrackets.android.exomedia.ui.widget.controls
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Handler
-import androidx.annotation.ColorRes
-import androidx.annotation.IntRange
-import androidx.annotation.LayoutRes
+import android.os.Looper
 import android.util.AttributeSet
 import android.util.SparseBooleanArray
 import android.view.View
@@ -30,6 +28,9 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.annotation.ColorRes
+import androidx.annotation.IntRange
+import androidx.annotation.LayoutRes
 import com.devbrackets.android.exomedia.R
 import com.devbrackets.android.exomedia.ui.listener.VideoControlsButtonListener
 import com.devbrackets.android.exomedia.ui.listener.VideoControlsSeekListener
@@ -69,7 +70,7 @@ abstract class DefaultVideoControls : RelativeLayout, VideoControls {
   protected lateinit var playDrawable: Drawable
   protected lateinit var pauseDrawable: Drawable
 
-  protected var visibilityHandler = Handler()
+  protected var visibilityHandler = Handler(Looper.getMainLooper())
   protected var progressPollRepeater = Repeater()
 
   protected var videoView: VideoView? = null
