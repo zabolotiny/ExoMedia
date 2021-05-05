@@ -58,6 +58,7 @@
         android:layout_alignParentStart="true"
         android:background="@drawable/exomedia_default_controls_interactive_background"
         android:orientation="vertical"
+        android:descendantFocusability="afterDescendants"
         android:paddingBottom="16dp"
         android:paddingTop="16dp">
 
@@ -66,6 +67,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="16dp"
+            android:descendantFocusability="afterDescendants"
             android:layout_marginRight="16dp"
             android:orientation="horizontal">
 
@@ -77,6 +79,7 @@
                 android:paddingRight="2dp"
                 android:textColor="@android:color/white"
                 android:typeface="monospace"
+                android:accessibilityTraversalBefore="@id/exomedia_controls_video_seek"
                 android:importantForAccessibility="yes"
                 tools:ignore="RtlHardcoded"
                 tools:text="1:06:29"/>
@@ -95,6 +98,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="2dp"
+                android:accessibilityTraversalAfter="@id/exomedia_controls_video_seek"
                 android:paddingRight="2dp"
                 android:textColor="@android:color/white"
                 android:typeface="monospace"
