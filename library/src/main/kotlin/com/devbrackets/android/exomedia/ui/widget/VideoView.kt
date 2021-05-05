@@ -732,8 +732,6 @@ open class VideoView : RelativeLayout {
     if (isInEditMode) {
       return
     }
-    isFocusable = true
-    isFocusableInTouchMode = true
 
     val attributes = VideoViewAttributeParser().parse(context, attrs)
     audioManager = context.applicationContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager

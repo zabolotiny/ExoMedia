@@ -31,10 +31,10 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.2.0'
 
     // ExoPlayer
-    implementation "com.google.android.exoplayer:exoplayer-core:$rootProject.ext.exoPlayerVersion"
-    implementation "com.google.android.exoplayer:exoplayer-dash:$rootProject.ext.exoPlayerVersion"
-    implementation "com.google.android.exoplayer:exoplayer-hls:$rootProject.ext.exoPlayerVersion"
-    implementation "com.google.android.exoplayer:exoplayer-smoothstreaming:$rootProject.ext.exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-core:$rootProject.ext.exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-dash:$rootProject.ext.exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-hls:$rootProject.ext.exoPlayerVersion"
+    api "com.google.android.exoplayer:exoplayer-smoothstreaming:$rootProject.ext.exoPlayerVersion"
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation "com.google.truth:truth:0.44"
